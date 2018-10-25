@@ -33,3 +33,7 @@ if settings.DEBUG:
     urlpatterns += [
         path('__debug__/', include(debug_toolbar.urls)),
     ]
+
+admin.site.site_header = 'Learning Site Admin'
+admin.site.index_title = 'Site Administration'
+admin.site.site_title = 'Learning Site Admin'
