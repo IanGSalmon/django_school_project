@@ -3,6 +3,12 @@ from django.urls import reverse
 
 from django.contrib.auth.models import User
 
+
+STATUS_CHOICES = (
+    ('i', 'In Progress'),
+    ('r', 'In Review'),
+    ('p', 'Published'),
+)
 # Create your models here.
 class Course(models.Model):
     # When record is first created, auto set now
@@ -13,7 +19,8 @@ class Course(models.Model):
     description = models.TextField()
     teacher = models.ForeignKey(User, on_delete=models.DO_NOTHING)
     subject = models.CharField(default='', max_length=100)
-    published = models.BooleanField(default=False)
+    is_live = models.BooleanField(default=False)
+    status = models.CharField(max_length=1, choices=STATUS_CHOICES, default='i')
 
     def __str__(self):
         return self.title

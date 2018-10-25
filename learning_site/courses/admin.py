@@ -3,6 +3,21 @@ from datetime import date
 
 from . import models
 
+admin.site.disable_action('delete_selected')
+
+def make_published(modeladmin, request, queryset):
+    queryset.update(status='p', is_live=True)
+
+
+def make_in_review(modeladmin, request, queryset):
+    queryset.update(status='r')
+
+def make_in_progress(modeladmin, request, queryset):
+    queryset.update(status='i')
+
+make_published.short_description = 'Mark selected courses as Published'
+make_in_review.short_description = 'Mark selected courses as In Review'
+make_in_progress.short_description = 'Mark selected courses as In Progress'
 
 class TextInline(admin.StackedInline):
     model = models.Text
@@ -12,7 +27,7 @@ class QuizInline(admin.StackedInline):
     model = models.Quiz
 
 
-class AnswerInline(admin.StackedInline):
+class AnswerInline(admin.TabularInline):
     model = models.Answer
 
 
@@ -42,7 +57,9 @@ class CourseAdmin(admin.ModelAdmin):
     fields = ['title', 'teacher', 'subject', 'description']
     search_fields = ['title', 'description']
     list_filter = ['created_at', 'subject', YearListFilter]
-    list_display = ['title', 'created_at', 'published', 'time_to_complete']
+    list_display = ['title', 'created_at', 'is_live', 'time_to_complete', 'status']
+    list_editable = ['status']
+    actions = [make_published, make_in_review, make_in_progress]
 
 
 class QuestionAdmin(admin.ModelAdmin):
@@ -50,6 +67,7 @@ class QuestionAdmin(admin.ModelAdmin):
     search_fields = ['prompt']
     list_display = ['prompt', 'quiz', 'order']
     list_editable = ['quiz', 'order']
+    #radio_fields = {'quiz': admin.HORIZONTAL}
 
 
 class QuizAdmin(admin.ModelAdmin):
@@ -57,7 +75,14 @@ class QuizAdmin(admin.ModelAdmin):
 
 
 class TextAdmin(admin.ModelAdmin):
-    fields = ['title', 'course', 'order', 'description', 'content']
+    #fields = ['title', 'course', 'order', 'description', 'content']
+    fieldsets = (
+        (None, {'fields':('course', 'title', 'order', 'description')
+        }),
+        ('Add content', {'fields':('content',),
+        'classes':('collapse',)
+        })
+    )
 
 
 admin.site.register(models.Course, CourseAdmin)
